@@ -29,6 +29,9 @@ composer require craftcms/security-patches:dev-main
 
 ## Mitigated Security Advisories
 
+- `GHSA-qcvp-ggx3-97r6` (SQL injection)
+  - Affects Craft CMS 4.0.0 – 4.18.8 and 5.0.0 – 5.11.1
+  - Fixed in Craft CMS 4.18.9 and 5.11.2
 - `CVE-2025-32432` (RCE)
   - Affects Craft CMS 3.0.0 – 3.9.14, 4.0.0 – 4.14.14, and 5.0.0 – 5.6.16
   - Fixed in Craft CMS 3.9.15, 4.14.15, and 5.6.17
