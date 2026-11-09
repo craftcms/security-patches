@@ -30,7 +30,9 @@ class Extension implements BootstrapInterface
         'craftcms/cms' => [
             '3.9.15',
             '4.14.15',
+            '4.18.9',
             '5.6.17',
+            '5.11.2',
         ],
     ];
 
@@ -43,6 +45,20 @@ class Extension implements BootstrapInterface
                 !empty($_SERVER['argv'])
             ) {
                 throw new BadRequestHttpException('argv not accepted on web requests.');
+            }
+        });
+
+        // GHSA-qcvp-ggx3-97r6
+        Event::on(Application::class, WebApplication::EVENT_INIT, function() {
+            $request = Craft::$app->getRequest();
+            if (
+                !$request->getIsConsoleRequest() &&
+                (
+                    $this->containsSearchConfig($request->getQueryParams()) ||
+                    $this->containsSearchConfig($request->getBodyParams())
+                )
+            ) {
+                throw new BadRequestHttpException('Search query configs not accepted on web requests.');
             }
         });
 
@@ -71,5 +87,26 @@ class Extension implements BootstrapInterface
                 }
             });
         }
+    }
+
+    /**
+     * Returns whether the given request params contain a nested array with `query` and `attribute` keys,
+     * which element queries would treat as a search query config.
+     *
+     * @param array $params
+     * @return bool
+     */
+    private function containsSearchConfig(array $params): bool
+    {
+        foreach ($params as $value) {
+            if (
+                is_array($value) &&
+                (isset($value['query'], $value['attribute']) || $this->containsSearchConfig($value))
+            ) {
+                return true;
+            }
+        }
+
+        return false;
     }
 }
